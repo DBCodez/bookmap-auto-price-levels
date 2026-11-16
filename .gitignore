@@ -1,0 +1,17 @@
+# Build & Python Cache Artifacts
+build/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Backups & Logs
+*.backup_*
+*.bak*
+*.log
+
+# Local AI Council & Workspace Instructions (Kept private on local machine)
+AGENTS.md
+GEMINI.md
+ask_claude.py
+.claude_debate_prompt.txt
+.claude_last_session.json
