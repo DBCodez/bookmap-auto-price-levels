@@ -140,10 +140,6 @@ mv.visitVarInsn(Opcodes.ALOAD, 0)
 mv.visitFieldInsn(Opcodes.GETFIELD, toggleListenerClass, "this\$0", "L$mainClass;")
 mv.visitInsn(Opcodes.ICONST_1)
 mv.visitFieldInsn(Opcodes.PUTFIELD, mainClass, "forceAllChartsOnNextTick", "Z")
-
-mv.visitVarInsn(Opcodes.ALOAD, 0)
-mv.visitFieldInsn(Opcodes.GETFIELD, toggleListenerClass, "this\$0", "L$mainClass;")
-mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, mainClass, "syncBookmapSettings", "()V", false)
 mv.visitLabel(cbTryE)
 mv.visitJumpInsn(Opcodes.GOTO, cbEnd)
 mv.visitLabel(cbCatch)
@@ -182,9 +178,6 @@ mv.visitVarInsn(Opcodes.ALOAD, 0)
 mv.visitFieldInsn(Opcodes.GETFIELD, applyListenerClass, "this\$0", "L$mainClass;")
 mv.visitInsn(Opcodes.ICONST_1)
 mv.visitFieldInsn(Opcodes.PUTFIELD, mainClass, "forceAllChartsOnNextTick", "Z")
-mv.visitVarInsn(Opcodes.ALOAD, 0)
-mv.visitFieldInsn(Opcodes.GETFIELD, applyListenerClass, "this\$0", "L$mainClass;")
-mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, mainClass, "syncBookmapSettings", "()V", false)
 mv.visitLabel(btnTryE)
 mv.visitJumpInsn(Opcodes.GOTO, btnEnd)
 mv.visitLabel(btnCatch)
@@ -306,7 +299,7 @@ mv.visitVarInsn(Opcodes.ALOAD, 0)
 mv.visitMethodInsn(Opcodes.INVOKESTATIC, "velox/api/layer1/common/ListenableHelper", "addListeners", "(Lvelox/api/layer1/LayerApiListenable;Ljava/lang/Object;)V", false)
 mv.visitLabel(afterAddListeners)
 
-mv.visitLdcInsn("AutoPriceLevels: Initializing v3 (Bookmap 8.0+ dynamic binding, schema v5)")
+mv.visitLdcInsn("AutoPriceLevels: Initializing v3.1 (Bookmap 8.0+ dynamic binding, schema v5)")
 mv.visitMethodInsn(Opcodes.INVOKESTATIC, "velox/api/layer1/common/Log", "info", "(Ljava/lang/String;)V", false)
 
 mv.visitVarInsn(Opcodes.ALOAD, 0)
@@ -619,7 +612,7 @@ mv.visitLabel(saLoopE)
 
 mv.visitTypeInsn(Opcodes.NEW, "java/lang/StringBuilder")
 mv.visitInsn(Opcodes.DUP)
-mv.visitLdcInsn("AutoPriceLevels v3: Bound settingsHolder=")
+mv.visitLdcInsn("AutoPriceLevels v3.1: Bound settingsHolder=")
 mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "(Ljava/lang/String;)V", false)
 def shNullLbl = new Label()
 def shDoneLbl = new Label()
@@ -647,9 +640,6 @@ mv.visitLabel(smDoneLbl)
 mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Z)Ljava/lang/StringBuilder;", false)
 mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false)
 mv.visitMethodInsn(Opcodes.INVOKESTATIC, "velox/api/layer1/common/Log", "info", "(Ljava/lang/String;)V", false)
-
-mv.visitVarInsn(Opcodes.ALOAD, 0)
-mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, mainClass, "syncBookmapSettings", "()V", false)
 
 mv.visitLabel(accTryEnd)
 mv.visitJumpInsn(Opcodes.GOTO, accReturn)
@@ -1301,17 +1291,7 @@ mv.visitInsn(Opcodes.ICONST_0)
 mv.visitFieldInsn(Opcodes.PUTFIELD, mainClass, "inactiveTicks", "I")
 mv.visitLabel(afterActiveReset)
 
-mv.visitVarInsn(Opcodes.ALOAD, 0)
-mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, mainClass, "buildPriceLevelsJson", "()Ljava/lang/String;", false)
-mv.visitVarInsn(Opcodes.ASTORE, 4)
-
-mv.visitTypeInsn(Opcodes.NEW, "velox/config/beans/StrategySettingsEntry")
-mv.visitInsn(Opcodes.DUP)
-mv.visitInsn(Opcodes.ICONST_5) // VERSION 5
-mv.visitVarInsn(Opcodes.ALOAD, 4)
-mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "velox/config/beans/StrategySettingsEntry", "<init>", "(ILjava/lang/String;)V", false)
-mv.visitVarInsn(Opcodes.ASTORE, 5)
-
+// Read and clear forceAllChartsOnNextTick BEFORE buildPriceLevelsJson() to preserve volatile ordering
 mv.visitVarInsn(Opcodes.ALOAD, 0)
 mv.visitFieldInsn(Opcodes.GETFIELD, mainClass, "forceAllChartsOnNextTick", "Z")
 mv.visitVarInsn(Opcodes.ISTORE, 6)
@@ -1325,6 +1305,17 @@ mv.visitVarInsn(Opcodes.ALOAD, 0)
 mv.visitFieldInsn(Opcodes.GETFIELD, mainClass, "initializedCharts", "Ljava/util/Set;")
 mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/util/Set", "clear", "()V", true)
 mv.visitLabel(afterForceReset)
+
+mv.visitVarInsn(Opcodes.ALOAD, 0)
+mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, mainClass, "buildPriceLevelsJson", "()Ljava/lang/String;", false)
+mv.visitVarInsn(Opcodes.ASTORE, 4)
+
+mv.visitTypeInsn(Opcodes.NEW, "velox/config/beans/StrategySettingsEntry")
+mv.visitInsn(Opcodes.DUP)
+mv.visitInsn(Opcodes.ICONST_5) // VERSION 5
+mv.visitVarInsn(Opcodes.ALOAD, 4)
+mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "velox/config/beans/StrategySettingsEntry", "<init>", "(ILjava/lang/String;)V", false)
+mv.visitVarInsn(Opcodes.ASTORE, 5)
 
 // Loop over all BookMapSettings getters (global + workspace)
 mv.visitInsn(Opcodes.ICONST_0)
@@ -1404,28 +1395,26 @@ mv.visitEnd()
 // onInstrumentAdded
 mv = cw.visitMethod(Opcodes.ACC_PUBLIC, "onInstrumentAdded", "(Ljava/lang/String;Lvelox/api/layer1/data/InstrumentInfo;)V", null, null)
 mv.visitCode()
-def oiaS = new Label()
-def oiaE = new Label()
-def oiaC = new Label()
-def oiaEnd = new Label()
-mv.visitTryCatchBlock(oiaS, oiaE, oiaC, "java/lang/Throwable")
-mv.visitLabel(oiaS)
-mv.visitVarInsn(Opcodes.ALOAD, 0)
-mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, mainClass, "syncBookmapSettings", "()V", false)
-mv.visitLabel(oiaE)
-mv.visitJumpInsn(Opcodes.GOTO, oiaEnd)
-mv.visitLabel(oiaC)
-mv.visitVarInsn(Opcodes.ASTORE, 3)
-mv.visitLdcInsn("AutoPriceLevels: Error in onInstrumentAdded")
-mv.visitVarInsn(Opcodes.ALOAD, 3)
-mv.visitMethodInsn(Opcodes.INVOKESTATIC, "velox/api/layer1/common/Log", "error", "(Ljava/lang/String;Ljava/lang/Throwable;)V", false)
-mv.visitLabel(oiaEnd)
 mv.visitInsn(Opcodes.RETURN)
 mv.visitMaxs(0, 0)
 mv.visitEnd()
 
 // onInstrumentRemoved
 mv = cw.visitMethod(Opcodes.ACC_PUBLIC, "onInstrumentRemoved", "(Ljava/lang/String;)V", null, null)
+mv.visitCode()
+mv.visitInsn(Opcodes.RETURN)
+mv.visitMaxs(0, 0)
+mv.visitEnd()
+
+// onInstrumentAlreadySubscribed
+mv = cw.visitMethod(Opcodes.ACC_PUBLIC, "onInstrumentAlreadySubscribed", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", null, null)
+mv.visitCode()
+mv.visitInsn(Opcodes.RETURN)
+mv.visitMaxs(0, 0)
+mv.visitEnd()
+
+// onInstrumentNotFound
+mv = cw.visitMethod(Opcodes.ACC_PUBLIC, "onInstrumentNotFound", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", null, null)
 mv.visitCode()
 mv.visitInsn(Opcodes.RETURN)
 mv.visitMaxs(0, 0)
@@ -1491,7 +1480,7 @@ mv.visitFieldInsn(Opcodes.PUTFIELD, "java/awt/GridBagConstraints", "insets", "Lj
 mv.visitVarInsn(Opcodes.ALOAD, 3)
 mv.visitTypeInsn(Opcodes.NEW, "javax/swing/JLabel")
 mv.visitInsn(Opcodes.DUP)
-mv.visitLdcInsn("Status: Auto-enabling Price Levels (Bookmap 8.0+ v3)")
+mv.visitLdcInsn("Status: Auto-enabling Price Levels (Bookmap 8.0+ v3.1)")
 mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "javax/swing/JLabel", "<init>", "(Ljava/lang/String;)V", false)
 mv.visitVarInsn(Opcodes.ALOAD, 4)
 mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "velox/gui/StrategyPanel", "add", "(Ljava/awt/Component;Ljava/lang/Object;)V", false)
@@ -1636,7 +1625,15 @@ mv.visitEnd()
 
 cw.visitEnd()
 
-// Write jar
+// Write jar & run mandatory in-memory child ClassLoader + interface completeness verification
+def classBytesMap = [
+    (mainClass.replace('/', '.'))          : cw.toByteArray(),
+    (runnableClass.replace('/', '.'))      : cw1.toByteArray(),
+    (toggleListenerClass.replace('/', '.')): cw2.toByteArray(),
+    (applyListenerClass.replace('/', '.')) : cw3.toByteArray(),
+    (threadFactoryClass.replace('/', '.')) : cw4.toByteArray()
+]
+
 def zos = new ZipOutputStream(new FileOutputStream(jarFile))
 def addEntry = { String name, byte[] data ->
     def entry = new ZipEntry(name)
@@ -1645,16 +1642,39 @@ def addEntry = { String name, byte[] data ->
     zos.closeEntry()
 }
 addEntry("META-INF/MANIFEST.MF", "Manifest-Version: 1.0\r\n\r\n".bytes)
-addEntry("${mainClass}.class", cw.toByteArray())
-addEntry("${runnableClass}.class", cw1.toByteArray())
-addEntry("${toggleListenerClass}.class", cw2.toByteArray())
-addEntry("${applyListenerClass}.class", cw3.toByteArray())
-addEntry("${threadFactoryClass}.class", cw4.toByteArray())
+classBytesMap.each { String dotName, byte[] data ->
+    addEntry(dotName.replace('.', '/') + ".class", data)
+}
 zos.close()
-println "Successfully built v3: " + jarFile.absolutePath
+
+// Verify bytecode linking & zero unimplemented abstract methods across all generated classes
+def memLoader = new ClassLoader(ClassLoader.getSystemClassLoader()) {
+    @Override
+    protected Class<?> findClass(String name) throws ClassNotFoundException {
+        byte[] b = classBytesMap[name]
+        if (b == null) {
+            throw new ClassNotFoundException(name)
+        }
+        return defineClass(name, b, 0, b.length)
+    }
+}
+classBytesMap.keySet().each { String dotName ->
+    Class<?> loaded = Class.forName(dotName, true, memLoader)
+    if (!java.lang.reflect.Modifier.isAbstract(loaded.getModifiers())) {
+        def unimplemented = loaded.getMethods().findAll { java.lang.reflect.Modifier.isAbstract(it.getModifiers()) }
+        if (!unimplemented.isEmpty()) {
+            throw new IllegalStateException("AbstractMethodError trap in " + dotName + ": unimplemented " + unimplemented)
+        }
+    }
+}
+println "Verified all " + classBytesMap.size() + " classes (stackmaps + 0 unimplemented abstract interface methods)"
+println "Successfully built v3.1: " + jarFile.absolutePath
 '@
 
 $GeneratorFile = "$PSScriptRoot\build\GenerateJar.groovy"
 Set-Content -Path $GeneratorFile -Value $AsmGenerator -Encoding Ascii
 
-& $JavaExe --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.util.zip=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED -cp $ClassPath groovy.ui.GroovyMain $GeneratorFile $OutDir $JarPath
+& $JavaExe --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.util.zip=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED -cp $ClassPath groovy.ui.GroovyMain $GeneratorFile $OutDir $JarPath
+if ($LASTEXITCODE -ne 0) {
+    throw "build.ps1 failed with exit code $LASTEXITCODE"
+}

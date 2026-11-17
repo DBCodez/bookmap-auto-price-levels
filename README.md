@@ -69,7 +69,7 @@ powershell -ExecutionPolicy Bypass -File .\build.ps1
 ```
 
 ## Repository Contents
-- `AutoPriceLevels.jar` — Pre-built Bookmap 8.0+ L1 API v2 add-on (`v3`, obfuscation-independent dynamic binding).
+- `AutoPriceLevels.jar` — Pre-built Bookmap 8.0+ L1 API v2 add-on (`v3.1`, obfuscation-independent dynamic binding).
 - `src/com/bookmap/addons/autopricelevels/AutoPriceLevels.java` — Java reference source for the add-on.
 - `build.ps1` — Zero-JDK build script using Bookmap's bundled JRE.
 - `enable_price_levels.py` / `enable-price-levels.ps1` — Optional offline Bookmap config & `.bmw` workspace patcher.

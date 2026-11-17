@@ -96,7 +96,7 @@ public class AutoPriceLevels implements
         if (provider != null) {
             ListenableHelper.addListeners(provider, this);
         }
-        Log.info("AutoPriceLevels: Initializing v3 (Bookmap 8.0+ dynamic binding, schema v5)");
+        Log.info("AutoPriceLevels: Initializing v3.1 (Bookmap 8.0+ dynamic binding, schema v5)");
         startAutoEnableSynchronizer();
     }
 
@@ -184,9 +184,8 @@ public class AutoPriceLevels implements
                     }
                 }
             }
-            Log.info("AutoPriceLevels v3: Bound settingsHolder=" + (settingsHolder != null)
+            Log.info("AutoPriceLevels v3.1: Bound settingsHolder=" + (settingsHolder != null)
                     + ", strategyManager=" + (strategyManager != null));
-            syncBookmapSettings();
         } catch (Throwable t) {
             Log.error("AutoPriceLevels: Failed in acceptSettingsInterface", t);
         }
@@ -290,13 +289,13 @@ public class AutoPriceLevels implements
             inactiveTicks = 0;
         }
 
-        String json = buildPriceLevelsJson();
-        StrategySettingsEntry entry = new StrategySettingsEntry(BUILTIN_SETTINGS_VERSION, json);
         boolean forceAll = forceAllChartsOnNextTick;
         if (forceAll) {
             forceAllChartsOnNextTick = false;
             initializedCharts.clear();
         }
+        String json = buildPriceLevelsJson();
+        StrategySettingsEntry entry = new StrategySettingsEntry(BUILTIN_SETTINGS_VERSION, json);
 
         for (int i = 0; i < getters.length; i++) {
             try {
@@ -447,15 +446,18 @@ public class AutoPriceLevels implements
 
     @Override
     public void onInstrumentAdded(String alias, InstrumentInfo instrumentInfo) {
-        try {
-            syncBookmapSettings();
-        } catch (Throwable t) {
-            Log.error("AutoPriceLevels: Error in onInstrumentAdded", t);
-        }
     }
 
     @Override
     public void onInstrumentRemoved(String alias) {
+    }
+
+    @Override
+    public void onInstrumentAlreadySubscribed(String symbol, String exchange, String type) {
+    }
+
+    @Override
+    public void onInstrumentNotFound(String symbol, String exchange, String type) {
     }
 
     @Override
@@ -479,7 +481,7 @@ public class AutoPriceLevels implements
         gbc.anchor = GridBagConstraints.WEST;
         gbc.insets = new Insets(4, 6, 4, 6);
 
-        JLabel statusLabel = new JLabel("Status: Auto-enabling Price Levels (Bookmap 8.0+ v3)");
+        JLabel statusLabel = new JLabel("Status: Auto-enabling Price Levels (Bookmap 8.0+ v3.1)");
         panel.add(statusLabel, gbc);
 
         gbc.gridy++;
@@ -501,13 +503,12 @@ public class AutoPriceLevels implements
         ActionListener toggleListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                enableHigh = cbHigh.isSelected();
-                enableMid = cbMid.isSelected();
-                enableLow = cbLow.isSelected();
-                enableScheduledReset = cbReset.isSelected();
-                forceAllChartsOnNextTick = true;
                 try {
-                    syncBookmapSettings();
+                    enableHigh = cbHigh.isSelected();
+                    enableMid = cbMid.isSelected();
+                    enableLow = cbLow.isSelected();
+                    enableScheduledReset = cbReset.isSelected();
+                    forceAllChartsOnNextTick = true;
                 } catch (Throwable ignored) {
                 }
             }
@@ -522,9 +523,8 @@ public class AutoPriceLevels implements
         applyAllBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                forceAllChartsOnNextTick = true;
                 try {
-                    syncBookmapSettings();
+                    forceAllChartsOnNextTick = true;
                 } catch (Throwable ignored) {
                 }
             }
